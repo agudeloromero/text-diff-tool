@@ -2,7 +2,9 @@
 
 A clean, browser-based word-level diff tool inspired by Microsoft Word's **Track Changes** feature. Paste two versions of a text and instantly see every insertion and deletion highlighted inline — no installs, no server, no dependencies.
 
-🌐 **[Open the tool →](https://agudeloromero.github.io/tracked-changes/)**
+🌐 **[Open the tool →](https://agudeloromero.github.io/text-diff-tool/)**
+
+![Screenshot of the Tracked Changes tool showing a comparison between two sentences, with deleted words in red strikethrough and inserted words in blue underline](assets/screenshot.png)
 
 ---
 
@@ -10,8 +12,8 @@ A clean, browser-based word-level diff tool inspired by Microsoft Word's **Track
 
 Paste an **original** and an **updated** version of any text. The tool compares them at the word level and renders the differences inline:
 
-- <span style="color:#D93025">~~deleted words~~</span> — shown in red with strikethrough
-- <ins style="color:#1A73E8">inserted words</ins> — shown in blue with underline
+- ~~deleted words~~ — shown in red with strikethrough
+- _inserted words_ — shown in blue with underline
 
 It matches sentences intelligently before doing word-level diffing, so even paragraphs that were restructured or reordered are handled gracefully rather than shown as fully deleted/inserted blocks.
 
@@ -30,7 +32,7 @@ It matches sentences intelligently before doing word-level diffing, so even para
 
 ## How to use
 
-1. Open the [live tool](https://agudeloromero.github.io/tracked-changes/)
+1. Open the [live tool](https://agudeloromero.github.io/text-diff-tool/)
 2. Paste your **original text** in the left box
 3. Paste your **updated text** in the right box
 4. Click **▶ Compare**
@@ -53,8 +55,8 @@ It matches sentences intelligently before doing word-level diffing, so even para
 No build step needed. Just open the file in any browser:
 
 ```bash
-git clone https://github.com/agudeloromero/tracked-changes.git
-cd tracked-changes
+git clone https://github.com/agudeloromero/text-diff-tool.git
+cd text-diff-tool
 open index.html   # macOS
 # or double-click index.html in your file explorer
 ```
@@ -76,9 +78,11 @@ Everything runs client-side in vanilla JavaScript — no frameworks, no external
 ## File structure
 
 ```
-tracked-changes/
-└── index.html    # The entire app — self-contained
-└── README.md     # This file
+text-diff-tool/
+├── index.html        # The entire app — self-contained
+├── README.md         # This file
+└── assets/
+    └── screenshot.png   # Screenshot for this README
 ```
 
 ---
