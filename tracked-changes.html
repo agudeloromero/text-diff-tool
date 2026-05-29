@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracked Changes — Text Diff Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #4F7CFF;
+    --blue-dark: #3a63e0;
+    --red: #D93025;
+    --ins: #1A73E8;
+    --bg: #F7F7F5;
+    --surface: #FFFFFF;
+    --border: #E2E2DE;
+    --text: #1A1A1A;
+    --text-2: #666660;
+    --text-3: #AAAAAA;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -.2px;
+    color: var(--text);
+  }
+  header p {
+    font-size: 13px;
+    color: var(--text-2);
+  }
+
+  /* ── Layout ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+  }
+
+  /* ── Input section ── */
+  .inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .input-card-header {
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .input-card-header .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .dot-a { background: #FF6B6B; }
+  .dot-b { background: #4F7CFF; }
+  .input-card-header label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-2);
+    font-family: 'DM Mono', monospace;
+  }
+  textarea {
+    width: 100%;
+    height: 170px;
+    font-size: 13.5px;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.65;
+    border: none;
+    padding: 14px;
+    background: var(--surface);
+    color: var(--text);
+    resize: vertical;
+    outline: none;
+    display: block;
+  }
+  textarea::placeholder { color: var(--text-3); }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 22px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: transform .1s, box-shadow .1s, background .15s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(79,124,255,.35);
+  }
+  .btn-primary:hover { background: var(--blue-dark); box-shadow: 0 3px 12px rgba(79,124,255,.45); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: #f0f0ee; }
+  .stat-line {
+    font-size: 12.5px;
+    color: var(--text-2);
+    font-family: 'DM Mono', monospace;
+    margin-left: auto;
+  }
+  .stat-ins { color: var(--ins); font-weight: 600; }
+  .stat-del { color: var(--red); font-weight: 600; }
+
+  /* ── Result area ── */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .result-toolbar {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #FAFAF8;
+  }
+  .tab-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-2);
+    transition: background .15s, color .15s;
+  }
+  .tab-btn:hover { background: #ededeb; }
+  .tab-btn.active {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+  .legend {
+    margin-left: auto;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+  .legend-del { color: var(--red); text-decoration: line-through; }
+  .legend-ins { color: var(--ins); text-decoration: underline; }
+
+  .result-body {
+    padding: 24px 28px;
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 15px;
+    line-height: 2;
+    color: var(--text);
+    min-height: 120px;
+    max-height: 560px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .result-body.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-style: italic;
+    min-height: 160px;
+  }
+  del { color: var(--red); text-decoration: line-through; font-style: normal; }
+  ins { color: var(--ins); text-decoration: underline; font-style: normal; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  @media (max-width: 640px) {
+    .inputs { grid-template-columns: 1fr; }
+    header { padding: 14px 16px; flex-direction: column; gap: 4px; }
+    main { padding: 16px 12px 40px; }
+    .result-body { padding: 16px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tracked Changes</h1>
+  <p>Word-level diff tool — paste two versions of a text and see exactly what changed.</p>
+</header>
+
+<main>
+  <div class="inputs">
+    <div class="input-card">
+      <div class="input-card-header">
+        <div class="dot dot-a"></div>
+        <label>Original text</label>
+      </div>
+      <textarea id="tA" placeholder="Paste your original text here…"></textarea>
+    </div>
+    <div class="input-card">
+      <div class="input-card-header">
+        <div class="dot dot-b"></div>
+        <label>Updated text</label>
+      </div>
+      <textarea id="tB" placeholder="Paste your updated text here…"></textarea>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-primary" onclick="runDiff()">▶ Compare</button>
+    <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+    <div class="stat-line" id="statLine"></div>
+  </div>
+
+  <div class="result-card">
+    <div class="result-toolbar">
+      <button class="tab-btn active" id="t1" onclick="showView(0)">Track changes</button>
+      <button class="tab-btn" id="t2" onclick="showView(1)">Original</button>
+      <button class="tab-btn" id="t3" onclick="showView(2)">Updated</button>
+      <div class="legend">
+        <span class="legend-del">deleted</span>
+        <span class="legend-ins">inserted</span>
+      </div>
+    </div>
+    <div class="result-body placeholder" id="out">Paste two texts above and click Compare.</div>
+  </div>
+</main>
+
+<footer>tracked-changes · word-level diff · open source</footer>
+
+<script>
+var _ha='', _hb='', _hd='', _view=0;
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function norm(s){ return s.toLowerCase().replace(/[–—]/g,'-').replace(/\s+/g,' ').trim(); }
+
+function wordSim(a,b){
+  var wa=new Set((a.match(/\w+/g)||[]).map(function(s){return s.toLowerCase();}));
+  var wb=(b.match(/\w+/g)||[]).map(function(s){return s.toLowerCase();});
+  if(!wa.size||!wb.length) return 0;
+  var inter=wb.filter(function(w){return wa.has(w);}).length;
+  return inter/Math.max(wa.size,wb.length);
+}
+
+function toSents(text){
+  var tokens=[];
+  var parts=text.split(/(\n+)/);
+  for(var i=0;i<parts.length;i++){
+    var part=parts[i];
+    if(/^\n+$/.test(part)){ tokens.push({t:part,br:true}); }
+    else if(part){
+      var sents=part.match(/[^.!?]+[.!?]+\s*|[^.!?\n]+/g)||[part];
+      for(var j=0;j<sents.length;j++) if(sents[j].trim()) tokens.push({t:sents[j],br:false});
+    }
+  }
+  return tokens;
+}
+
+function lcs(na,nb){
+  var m=na.length, n=nb.length;
+  if(m*n>30000){
+    var mapB={};
+    for(var i=0;i<nb.length;i++) if(!(nb[i] in mapB)) mapB[nb[i]]=i;
+    var pairs=[],lastB=-1;
+    for(var i=0;i<m;i++){ if(na[i] in mapB&&mapB[na[i]]>lastB){pairs.push([i,mapB[na[i]]]);lastB=mapB[na[i]];} }
+    return pairs;
+  }
+  var dp=[];
+  for(var i=0;i<=m;i++) dp[i]=new Uint16Array(n+1);
+  for(var i=m-1;i>=0;i--) for(var j=n-1;j>=0;j--) dp[i][j]=na[i]===nb[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  var pairs=[],i=0,j=0;
+  while(i<m&&j<n){
+    if(na[i]===nb[j]){pairs.push([i,j]);i++;j++;}
+    else if(dp[i+1]&&dp[i+1][j]>=dp[i][j+1]) i++; else j++;
+  }
+  return pairs;
+}
+
+function wdiff(a,b){
+  var wa=a.match(/[^\s]+|\s+/g)||[];
+  var wb=b.match(/[^\s]+|\s+/g)||[];
+  var m=wa.length, n=wb.length;
+  if(m*n>200000) return '<del>'+esc(a)+'</del><ins>'+esc(b)+'</ins>';
+  var dp=[];
+  for(var i=0;i<=m;i++) dp[i]=new Uint16Array(n+1);
+  for(var i=m-1;i>=0;i--) for(var j=n-1;j>=0;j--) dp[i][j]=wa[i]===wb[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  var h='',ii=0,jj=0;
+  while(ii<m||jj<n){
+    if(ii<m&&jj<n&&wa[ii]===wb[jj]){h+=esc(wa[ii]);ii++;jj++;}
+    else if(jj<n&&(ii>=m||dp[ii][jj+1]>=dp[ii+1][jj])){h+='<ins>'+esc(wb[jj])+'</ins>';jj++;}
+    else{h+='<del>'+esc(wa[ii])+'</del>';ii++;}
+  }
+  return h;
+}
+
+function buildDiff(tA,tB){
+  var sA=toSents(tA), sB=toSents(tB);
+  var nbA=sA.filter(function(s){return !s.br;}), nbB=sB.filter(function(s){return !s.br;});
+  var pairs=lcs(nbA.map(function(s){return norm(s.t);}), nbB.map(function(s){return norm(s.t);}));
+  var mA={},mB={};
+  for(var i=0;i<pairs.length;i++){mA[pairs[i][0]]=1;mB[pairs[i][1]]=1;}
+  var unmA=[],unmB=[];
+  for(var i=0;i<nbA.length;i++) if(!mA[i]) unmA.push(i);
+  for(var i=0;i<nbB.length;i++) if(!mB[i]) unmB.push(i);
+  var usedB={},simPairs=[];
+  for(var ii=0;ii<unmA.length;ii++){
+    var best=-1,bestS=0.25;
+    for(var jj=0;jj<unmB.length;jj++){
+      if(usedB[unmB[jj]]) continue;
+      var s=wordSim(nbA[unmA[ii]].t, nbB[unmB[jj]].t);
+      if(s>bestS){bestS=s;best=unmB[jj];}
+    }
+    if(best>=0){simPairs.push([unmA[ii],best]);usedB[best]=1;mA[unmA[ii]]=1;mB[best]=1;}
+  }
+  var allP=pairs.concat(simPairs);
+  var BtoA={};
+  for(var i=0;i<allP.length;i++) BtoA[allP[i][1]]=allP[i][0];
+  var emitA={},aPtr=0,nbIdx=0,html='';
+  for(var si=0;si<sB.length;si++){
+    var bSent=sB[si];
+    if(bSent.br){html+=esc(bSent.t);continue;}
+    var ib=nbIdx++;
+    var aIdx=BtoA[ib];
+    var aUpTo=(aIdx!==undefined)?aIdx:aPtr;
+    for(var k=aPtr;k<aUpTo;k++){if(!emitA[k]){emitA[k]=1;html+='<del>'+esc(nbA[k].t)+'</del>';}}
+    if(aIdx!==undefined){aPtr=aIdx+1;emitA[aIdx]=1;html+=wdiff(nbA[aIdx].t,bSent.t);}
+    else html+='<ins>'+esc(bSent.t)+'</ins>';
+  }
+  for(var k=aPtr;k<nbA.length;k++) if(!emitA[k]) html+='<del>'+esc(nbA[k].t)+'</del>';
+  return html;
+}
+
+function runDiff(){
+  var tA=document.getElementById('tA').value.trim();
+  var tB=document.getElementById('tB').value.trim();
+  var out=document.getElementById('out');
+  if(!tA||!tB){
+    out.className='result-body placeholder';
+    out.innerHTML='Please paste text in both boxes.';
+    document.getElementById('statLine').innerHTML='';
+    return;
+  }
+  _ha=esc(tA); _hb=esc(tB);
+  _hd=buildDiff(tA,tB);
+  var dels=(_hd.match(/<del>/g)||[]).length;
+  var ins=(_hd.match(/<ins>/g)||[]).length;
+  document.getElementById('statLine').innerHTML=
+    '<span class="stat-ins">+'+ins+' inserted</span> &nbsp; <span class="stat-del">−'+dels+' deleted</span>';
+  _view=0; updateTabs();
+  out.className='result-body';
+  out.innerHTML=_hd;
+}
+
+function showView(v){
+  if(_hd==='') return;
+  _view=v; updateTabs();
+  var el=document.getElementById('out');
+  el.className='result-body';
+  if(v===0) el.innerHTML=_hd;
+  else if(v===1) el.innerHTML=_ha;
+  else el.innerHTML=_hb;
+}
+
+function updateTabs(){
+  for(var i=0;i<3;i++){
+    var btn=document.getElementById('t'+(i+1));
+    btn.className='tab-btn'+(i===_view?' active':'');
+  }
+}
+
+function clearAll(){
+  document.getElementById('tA').value='';
+  document.getElementById('tB').value='';
+  var out=document.getElementById('out');
+  out.className='result-body placeholder';
+  out.innerHTML='Paste two texts above and click Compare.';
+  document.getElementById('statLine').innerHTML='';
+  _ha='';_hb='';_hd='';_view=0;
+  updateTabs();
+}
+</script>
+</body>
+</html>
