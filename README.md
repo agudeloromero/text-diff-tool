@@ -1,4 +1,4 @@
-# 🔍 Tracked Changes — Text Diff Tool
+# 🔍 Tracked Changes | Text Diff Tool
 
 A clean, browser-based word-level diff tool inspired by Microsoft Word's **Track Changes** feature. Paste two versions of a text and instantly see every insertion and deletion highlighted inline — no installs, no server, no dependencies.
 
