@@ -4,7 +4,7 @@ A clean, browser-based word-level diff tool inspired by Microsoft Word's **Track
 
 🌐 **[Open the tool →](https://agudeloromero.github.io/text-diff-tool/)**
 
-![Screenshot of the Tracked Changes tool showing a comparison between two sentences, with deleted words in red strikethrough and inserted words in blue underline](assets/screenshot.png)
+![Screenshot of the Tracked Changes tool showing a comparison between two sentences, with deleted words in red strikethrough and inserted words in blue underline](assets/Tracked_Changes_Picture.jpg)
 
 ---
 
@@ -42,7 +42,7 @@ It matches sentences intelligently before doing word-level diffing, so even para
 
 ## Use cases
 
-- Reviewing manuscript or thesis revisions
+- Reviewing text, manuscript or thesis revisions
 - Comparing draft versions of scientific papers or reports
 - Checking edits from collaborators
 - Tracking changes in grant applications or cover letters
@@ -75,22 +75,10 @@ Everything runs client-side in vanilla JavaScript — no frameworks, no external
 
 ---
 
-## File structure
-
-```
-text-diff-tool/
-├── index.html        # The entire app — self-contained
-├── README.md         # This file
-└── assets/
-    └── screenshot.png   # Screenshot for this README
-```
-
----
-
 ## License
 
 MIT — free to use, modify, and share.
 
 ---
 
-*Built with ❤️ for researchers who review a lot of tracked changes.*
+
